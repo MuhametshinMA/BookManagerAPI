@@ -1,0 +1,38 @@
+# db/changelog/db.changelog-master.yaml
+
+databaseChangeLog:
+#  - include:
+#      file: db/changelog/initial.yaml
+  - changeSet:
+      id: 1
+      author: MaratMuhametshin
+      changes:
+        - preConditions:
+            onFail: MARK_RAN
+            not:
+              tableExists:
+                tableName: book
+        - createTable:
+            tableName: book
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: author
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: published_date
+                  type: date
+                  constraints:
+                    nullable: false
