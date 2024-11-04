@@ -7,12 +7,11 @@ import com.example.bookmanager.exception.BusinessException;
 import com.example.bookmanager.exception.handler.ExceptionHandler;
 import com.example.bookmanager.rabbitmq.service.SenderService;
 import com.example.bookmanager.repository.BookRepository;
-import com.example.bookmanager.request.BookRegistrationRequest;
+import com.example.bookmanager.request.BookRequest;
 import com.example.bookmanager.response.ApiResponse;
 import com.example.bookmanager.response.BookResponse;
 import com.example.bookmanager.service.BookService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class BookRegistrationServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public ResponseEntity<ApiResponse<BookResponse>> addBook(BookRegistrationRequest request) {
+    public ResponseEntity<ApiResponse<BookResponse>> addBook(BookRequest request) {
 
         throwIfExists(request);
 
@@ -53,9 +52,7 @@ public class BookRegistrationServiceImpl implements BookService {
     @Transactional
     public ResponseEntity<ApiResponse<BookResponse>> getBookById(long id) {
 
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> ExceptionHandler
-                        .raiseException(BusinessException.class, ErrorCode.BOOK_NOT_FOUND));
+        Book book = getBookOrThrow(id);
 
         return ResponseEntity.ok(buildResponse(
                 book,
@@ -63,6 +60,51 @@ public class BookRegistrationServiceImpl implements BookService {
                 SuccessCode.BOOK_FOUND.toString())
         );
     }
+
+    @Override
+    @Transactional
+    public ResponseEntity<ApiResponse<BookResponse>> updateBook(BookRequest request) {
+
+        if (request.getId() == null) ExceptionHandler
+                .raiseException(BusinessException.class, ErrorCode.INVALID_BOOK_ID);
+
+        Book book = getBookOrThrow(request.getId());
+
+        if (book == null) {
+            throw ExceptionHandler
+                    .raiseException(BusinessException.class, ErrorCode.BOOK_NOT_FOUND);
+        }
+
+        Book toUpdate = Book.builder()
+                .id(request.getId())
+                .author(request.getAuthor())
+                .title(request.getTitle())
+                .publishedDate(request.getPublishedDate())
+                .build();
+
+        Book updatedBook = bookRepository.save(toUpdate);
+
+        senderService.send(SuccessCode.BOOK_UPDATED.toString());
+
+        return ResponseEntity.ok(buildResponse(
+                updatedBook,
+                HttpStatus.OK.toString(),
+                SuccessCode.BOOK_UPDATED.toString()
+        ));
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<ApiResponse<BookResponse>> deleteBook(long id) {
+
+        Book book = getBookOrThrow(id);
+
+//        senderService.send();
+
+        bookRepository.delete(book);
+        return null;
+    }
+
 
     private ApiResponse<BookResponse> buildResponse(Book book, String status, String message) {
         BookResponse response = BookResponse.builder()
@@ -79,16 +121,28 @@ public class BookRegistrationServiceImpl implements BookService {
                 .build();
     }
 
-    private void throwIfExists(BookRegistrationRequest request) {
-        Book existingBook = bookRepository.findByTitleAndAuthorAndPublishedDate(
+    private void throwIfExists(BookRequest request) {
+
+        Book book = getBook(request);
+        if (book != null) {
+            throw ExceptionHandler
+                    .raiseException(BusinessException.class, ErrorCode.BOOK_EXISTS);
+        }
+    }
+
+    private Book getBookOrThrow(Long id) {
+
+        return bookRepository.findById(id)
+                .orElseThrow(() -> ExceptionHandler
+                        .raiseException(BusinessException.class, ErrorCode.BOOK_NOT_FOUND));
+    }
+
+    private Book getBook(BookRequest request) {
+
+        return bookRepository.findByTitleAndAuthorAndPublishedDate(
                 request.getTitle(),
                 request.getAuthor(),
                 request.getPublishedDate()
         );
-
-        if (existingBook != null) {
-            throw ExceptionHandler
-                    .raiseException(BusinessException.class, ErrorCode.BOOK_EXISTS);
-        }
     }
 }

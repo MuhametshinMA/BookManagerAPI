@@ -8,7 +8,9 @@ import javax.validation.constraints.Past;
 import java.time.LocalDate;
 
 @Data
-public class BookRegistrationRequest {
+public class BookRequest {
+
+    private Long id;
 
     @NotBlank(message = "title can't be empty")
     private String title;

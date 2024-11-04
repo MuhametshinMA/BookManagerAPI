@@ -1,6 +1,6 @@
 package com.example.bookmanager.controller;
 
-import com.example.bookmanager.request.BookRegistrationRequest;
+import com.example.bookmanager.request.BookRequest;
 import com.example.bookmanager.response.ApiResponse;
 import com.example.bookmanager.response.BookResponse;
 import com.example.bookmanager.service.BookService;
@@ -18,12 +18,17 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse<BookResponse>> addBook(@RequestBody @Valid BookRegistrationRequest request) {
+    public ResponseEntity<ApiResponse<BookResponse>> addBook(@RequestBody @Valid BookRequest request) {
         return bookService.addBook(request);
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<ApiResponse<BookResponse>> getBookById(@PathVariable long id) {
         return bookService.getBookById(id);
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<ApiResponse<BookResponse>> updateBook(@RequestBody @Valid BookRequest request) {
+        return bookService.updateBook(request);
     }
 }

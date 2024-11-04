@@ -11,7 +11,9 @@ public enum ErrorCode {
 
     VALIDATION_FAILED(2, "Request fields incorrect"),
 
-    BOOK_NOT_FOUND(3, "Book not found");
+    BOOK_NOT_FOUND(3, "Book not found"),
+
+    INVALID_BOOK_ID(4, "Invalid book id");
 
     private final int code;
 
