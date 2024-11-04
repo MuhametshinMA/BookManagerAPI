@@ -4,7 +4,7 @@ import com.example.bookmanager.enums.ErrorCode;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class BussinessException extends RuntimeException implements BookErrors {
+public class BusinessException extends RuntimeException implements BookErrors {
 
     private final ErrorCode errorCode;
 
@@ -15,6 +15,6 @@ public class BussinessException extends RuntimeException implements BookErrors {
 
     @Override
     public String toString() {
-        return "BusinessException " + errorCode.getCode() + ": " + getMessage();
+        return "BusinessException " + errorCode.getCode() + ": " + errorCode.getMessage();
     }
 }
