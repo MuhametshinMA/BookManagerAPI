@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class Book extends BaseEntity{
-    private Long id;
     private String title;
     private String author;
     private LocalDate publishedDate;

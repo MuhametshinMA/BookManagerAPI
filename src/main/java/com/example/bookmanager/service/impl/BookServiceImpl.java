@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class BookRegistrationServiceImpl implements BookService {
+public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
@@ -79,11 +79,11 @@ public class BookRegistrationServiceImpl implements BookService {
         }
 
         Book toUpdate = Book.builder()
-                .id(request.getId())
                 .author(request.getAuthor())
                 .title(request.getTitle())
                 .publishedDate(request.getPublishedDate())
                 .build();
+        toUpdate.setId(request.getId());
 
         Book updatedBook = bookRepository.save(toUpdate);
 
