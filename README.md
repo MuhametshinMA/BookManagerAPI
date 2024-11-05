@@ -1,4 +1,6 @@
 # BookManagerAPI
+
+#### SpringBoot application for SMS Finance
 Java 11, SpringBoot, Web MVC, RabbitMQ
 
 For run project need:
