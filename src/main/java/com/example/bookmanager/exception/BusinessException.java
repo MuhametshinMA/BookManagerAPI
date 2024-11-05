@@ -10,7 +10,7 @@ public class BusinessException extends RuntimeException implements BookErrors {
 
     @Override
     public ErrorCode getErrorCode() {
-        return null;
+        return errorCode;
     }
 
     @Override

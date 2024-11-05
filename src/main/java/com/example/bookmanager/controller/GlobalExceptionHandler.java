@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<String> response = ApiResponse.<String>builder()
                 .status(HttpStatus.CONFLICT.toString())
-                .message(ErrorCode.BOOK_EXISTS.getMessage())
+                .message(ex.getErrorCode().getMessage())
                 .data(error)
                 .build();
         return ResponseEntity.badRequest().body(response);

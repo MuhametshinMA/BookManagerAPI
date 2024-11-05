@@ -12,6 +12,9 @@ import com.example.bookmanager.response.ApiResponse;
 import com.example.bookmanager.response.BookResponse;
 import com.example.bookmanager.service.BookService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,7 +42,7 @@ public class BookRegistrationServiceImpl implements BookService {
 
         Book savedBook = bookRepository.save(book);
 
-        senderService.send(SuccessCode.BOOK_ADDED.toString());
+        senderService.send(buildSendMessage(book, SuccessCode.BOOK_ADDED.toString()));
 
         return ResponseEntity.ok(buildResponse(
                 savedBook,
@@ -84,7 +87,7 @@ public class BookRegistrationServiceImpl implements BookService {
 
         Book updatedBook = bookRepository.save(toUpdate);
 
-        senderService.send(SuccessCode.BOOK_UPDATED.toString());
+        senderService.send(buildSendMessage(toUpdate, SuccessCode.BOOK_UPDATED.toString()));
 
         return ResponseEntity.ok(buildResponse(
                 updatedBook,
@@ -99,10 +102,44 @@ public class BookRegistrationServiceImpl implements BookService {
 
         Book book = getBookOrThrow(id);
 
-//        senderService.send();
+        senderService.send(buildSendMessage(book, SuccessCode.BOOK_DELETED.toString()));
 
         bookRepository.delete(book);
-        return null;
+
+        return ResponseEntity.ok(buildResponse(
+                book,
+                HttpStatus.OK.toString(),
+                SuccessCode.BOOK_DELETED.toString()
+        ));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<Page<BookResponse>>> getAllBook(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Book> bookPage = bookRepository.findAll(pageable);
+
+        if (bookPage.isEmpty()) ExceptionHandler
+                .raiseException(BusinessException.class, ErrorCode.BOOK_NOT_FOUND);
+
+        Page<BookResponse> bookResponses = bookPage.map(book -> new BookResponse(
+                book.getId(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getPublishedDate()
+        ));
+
+        ApiResponse<Page<BookResponse>> response = ApiResponse.<Page<BookResponse>>builder()
+                .data(bookResponses)
+                .status(HttpStatus.OK.toString())
+                .message(SuccessCode.BOOK_FOUND.toString())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    private String buildSendMessage(Book book, String status) {
+        return book + ": " + status;
     }
 
 
