@@ -11,4 +11,3 @@ go to directory BookManagerAPI
 need tests
 
 to improve project we can add logging, cache
-
